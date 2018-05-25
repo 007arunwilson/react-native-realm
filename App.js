@@ -6,11 +6,37 @@
 
 import React, { Component } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import { Router, Scene } from "react-native-router-flux";
+import { Router, Scene, Actions } from "react-native-router-flux";
+import realmInstance from "./realm";
+import FirstScene from "./src/Components/FirstScreen";
+import SecondScene from "./src/Components/SecondScreen";
 
 const platformName = Platform.select({ android: "Android", ios: "IOS" });
 
 class App extends Component {
+  componentDidMount() {
+    console.log("Component Did Mount");
+  }
+
+  onEnter() {
+    console.log("On Enter");
+
+    const appInstalledOn = realmInstance
+      .objects("AppOptions")
+      .filtered("key = 'app_initial_open'");
+
+    if (appInstalledOn.length) {
+      Actions.FirstScene();
+    } else {
+      realmInstance.write(() => {
+        realmInstance.create("AppOptions", {
+          key: "app_initial_open",
+          value: Date.now().toString()
+        });
+      });
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -18,7 +44,7 @@ class App extends Component {
         <Text style={styles.instructions}>
           Please wait, app is initializing ...
         </Text>
-        <Text style={styles.instructions}>
+        <Text style={[styles.instructions, { fontSize: 8 }]}>
           (Data is retrieving from realm. may take some time to initiate your{" "}
           {platformName} App)
         </Text>
@@ -49,7 +75,11 @@ const styles = StyleSheet.create({
 const ReactRouter = () => (
   <Router>
     <Scene key="root">
-      <Scene key="initialApp" component={App} hideNavBar />
+      <Scene key="initialApp" component={App} initial hideNavBar />
+      <Scene key="discover">
+        <Scene key="firstScene" component={FirstScene} hideNavBar />
+        <Scene key="secondScene" component={SecondScene} hideNavBar />
+      </Scene>
     </Scene>
   </Router>
 );
