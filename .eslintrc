@@ -1,0 +1,6 @@
+{
+    "extends":"rallycoding",
+    "rules":{
+        "quotes": [2, "double"]
+    }
+}
