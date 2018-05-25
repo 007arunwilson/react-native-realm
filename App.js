@@ -26,7 +26,7 @@ class App extends Component {
       .filtered("key = 'app_initial_open'");
 
     if (appInstalledOn.length) {
-      Actions.FirstScene();
+      Actions.firstScene();
     } else {
       realmInstance.write(() => {
         realmInstance.create("AppOptions", {
