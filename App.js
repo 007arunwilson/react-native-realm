@@ -8,20 +8,19 @@ import React, { Component } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { Router, Scene, Actions } from "react-native-router-flux";
 import realmInstance from "./realm";
+import RedirectComponent from "./src/Utilities/redirectCompoenent";
 import FirstScene from "./src/Components/FirstScreen";
 import SecondScene from "./src/Components/SecondScreen";
 
 const platformName = Platform.select({ android: "Android", ios: "IOS" });
 
 class App extends Component {
+  state = {
+    appInitialOpen: null
+  };
+
   componentDidMount() {
-    console.log("Component Did Mount");
-  }
-
-  onEnter() {
-    console.log("On Enter");
-
-    const appInstalledOn = realmInstance
+    let appInstalledOn = realmInstance
       .objects("AppOptions")
       .filtered("key = 'app_initial_open'");
 
@@ -29,10 +28,12 @@ class App extends Component {
       Actions.firstScene();
     } else {
       realmInstance.write(() => {
-        realmInstance.create("AppOptions", {
+        appInstalledOn = realmInstance.create("AppOptions", {
           key: "app_initial_open",
           value: Date.now().toString()
         });
+
+        this.setState({ appInitialOpen: appInstalledOn.value });
       });
     }
   }
@@ -42,7 +43,9 @@ class App extends Component {
       <View style={styles.container}>
         <Text style={styles.welcome}>Welcome</Text>
         <Text style={styles.instructions}>
-          Please wait, app is initializing ...
+          {this.state.appInitialOpen
+            ? <RedirectComponent redirectTo="firstScene" />
+            : "Please wait, app is initializing ..."}
         </Text>
         <Text style={[styles.instructions, { fontSize: 8 }]}>
           (Data is retrieving from realm. may take some time to initiate your{" "}
